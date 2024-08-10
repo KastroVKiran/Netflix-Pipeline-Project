@@ -1,0 +1,123 @@
+PROJECT 3
+--------------------
+Repo URL: https://github.com/KastroVKiran/Netflix-Pipeline-Project.git
+
+In this project, we will configure 3 stages in the pipeline script
+
+Stage 1: Github Stage ----> Cloning the code/project repo
+
+Stage 2: Maven Stage -----> Build & Package the code (clean package)
+
+Stage 3: Deploy Stage -----> Deployment of the application
+
+---------------------
+Stage 1 - Script
+---------------------
+pipeline {
+    agent any
+
+    stages {
+        stage('Clone the Code') {
+            steps {
+                git credentialsId: 'git-creds', url: 'https://github.com/KastroVKiran/Netflix-Pipeline-Project.git'
+            }
+        }
+    }
+}
+
+---------------------
+Stage 2 - Script
+---------------------
+pipeline {
+    agent any
+
+    stages {
+        stage('Clone the Code') {
+            steps {
+                git credentialsId: 'git-creds', url: 'https://github.com/KastroVKiran/Netflix-Pipeline-Project.git'
+            }
+        }
+        stage('Maven Build Stage') {
+            steps {
+                script {
+                    def mavenHome = tool name: "maven s/w", type: "maven"
+                    def mavenCMD = "${mavenHome}/bin/mvn"
+                    sh "${mavenCMD} clean package"
+                }
+            }
+        }
+    }
+}
+
+---------------------
+Stage 3 - Script
+---------------------
+Note: Before writing stage 3, run the below commands in MobaXTerm
+sudo visudo
+
+Note: #Add the following line at the end of the file, assuming the Jenkins user is 'jenkins'
+jenkins ALL=(ALL) NOPASSWD: /bin/cp
+
+
+pipeline {
+    agent any
+
+    stages {
+        stage('Clone the Code') {
+            steps {
+                git credentialsId: 'git-creds', url: 'https://github.com/KastroVKiran/Netflix-Pipeline-Project.git'
+            }
+        }
+        stage('Maven Build Stage') {
+            steps {
+                script {
+                    def mavenHome = tool name: "maven s/w", type: "maven"
+                    def mavenCMD = "${mavenHome}/bin/mvn"
+                    sh "${mavenCMD} clean package"
+                }
+            }
+        }
+        stage('Deploy Stage') {
+            steps {
+                script {
+                    sh 'sudo cp target/NETFLIX-1.2.2.war /root/apache-tomcat-9.0.90/webapps'
+                }
+            }
+        }
+    }
+}
+
+
+
+
+----------------
+Final Script
+----------------
+pipeline {
+    agent any
+
+    stages {
+        stage('Clone the Code') {
+            steps {
+                git credentialsId: 'git-creds', url: 'https://github.com/KastroVKiran/Netflix-Pipeline-Project.git'
+            }
+        }
+        stage('Maven Build Stage') {
+            steps {
+                script {
+                    def mavenHome = tool name: "maven s/w", type: "maven"
+                    def mavenCMD = "${mavenHome}/bin/mvn"
+                    sh "${mavenCMD} clean package"
+                }
+            }
+        }
+        stage('Deploy Stage') {
+            steps {
+                script {
+                    sh 'sudo cp target/NETFLIX-1.2.2.war /root/apache-tomcat-9.0.90/webapps'
+                }
+            }
+        }
+    }
+}
+
