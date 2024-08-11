@@ -1,18 +1,5 @@
-PROJECT 3
---------------------
-Repo URL: https://github.com/KastroVKiran/Netflix-Pipeline-Project.git
-
-In this project, we will configure 3 stages in the pipeline script
-
-Stage 1: Github Stage ----> Cloning the code/project repo
-
-Stage 2: Maven Stage -----> Build & Package the code (clean package)
-
-Stage 3: Deploy Stage -----> Deployment of the application
-
----------------------
-Stage 1 - Script
----------------------
+Pipeline - Stage 1 
+-------------------------
 pipeline {
     agent any
 
@@ -25,11 +12,15 @@ pipeline {
     }
 }
 
----------------------
-Stage 2 - Script
----------------------
+
+Pipeline - Stage 1 & Stage 2
+----------------------------------------
 pipeline {
     agent any
+
+    tools {
+        maven 'maven s/w'
+    }
 
     stages {
         stage('Clone the Code') {
@@ -37,21 +28,28 @@ pipeline {
                 git credentialsId: 'git-creds', url: 'https://github.com/KastroVKiran/Netflix-Pipeline-Project.git'
             }
         }
-        stage('Maven Build Stage') {
+        stage('Maven Build') {
             steps {
                 script {
-                    def mavenHome = tool name: "maven s/w", type: "maven"
+                    def mavenHome = tool name: 'maven s/w', type: 'maven'
                     def mavenCMD = "${mavenHome}/bin/mvn"
-                    sh "${mavenCMD} clean package"
+                    // Run Maven build with parallel execution and skip tests if needed
+                    sh "${mavenCMD} clean package -T 1C -DskipTests"
                 }
             }
         }
     }
+
+    post {
+        always {
+            echo 'Cleaning up after build...'
+            cleanWs() // Clean workspace after build
+        }
+    }
 }
 
----------------------
-Stage 3 - Script
----------------------
+Pipeline - Stage 1 & Stage 2 & Stage 3
+--------------------------------------------------
 Note: Before writing stage 3, run the below commands in MobaXTerm
 sudo visudo
 
@@ -62,39 +60,9 @@ jenkins ALL=(ALL) NOPASSWD: /bin/cp
 pipeline {
     agent any
 
-    stages {
-        stage('Clone the Code') {
-            steps {
-                git credentialsId: 'git-creds', url: 'https://github.com/KastroVKiran/Netflix-Pipeline-Project.git'
-            }
-        }
-        stage('Maven Build Stage') {
-            steps {
-                script {
-                    def mavenHome = tool name: "maven s/w", type: "maven"
-                    def mavenCMD = "${mavenHome}/bin/mvn"
-                    sh "${mavenCMD} clean package"
-                }
-            }
-        }
-        stage('Deploy Stage') {
-            steps {
-                script {
-                    sh 'sudo cp target/NETFLIX-1.2.2.war /root/apache-tomcat-9.0.90/webapps'
-                }
-            }
-        }
+    tools {
+        maven 'maven s/w'
     }
-}
-
-
-
-
-----------------
-Final Script
-----------------
-pipeline {
-    agent any
 
     stages {
         stage('Clone the Code') {
@@ -102,22 +70,32 @@ pipeline {
                 git credentialsId: 'git-creds', url: 'https://github.com/KastroVKiran/Netflix-Pipeline-Project.git'
             }
         }
-        stage('Maven Build Stage') {
+        stage('Maven Build') {
             steps {
                 script {
-                    def mavenHome = tool name: "maven s/w", type: "maven"
+                    def mavenHome = tool name: 'maven s/w', type: 'maven'
                     def mavenCMD = "${mavenHome}/bin/mvn"
-                    sh "${mavenCMD} clean package"
+                    // Run Maven build with parallel execution and skip tests if needed
+                    sh "${mavenCMD} clean package -T 1C -DskipTests"
                 }
             }
         }
         stage('Deploy Stage') {
             steps {
                 script {
-                    sh 'sudo cp target/NETFLIX-1.2.2.war /root/apache-tomcat-9.0.90/webapps'
+                    // Ensure target directory exists before copying
+                    sh 'ls -l target'
+                    // Deploy the WAR file to Tomcat
+                    sh 'sudo cp target/NETFLIX-1.2.2.war /root/apache-tomcat-9.0.93/webapps'
                 }
             }
         }
     }
-}
 
+    post {
+        always {
+            echo 'Cleaning up after build...'
+            cleanWs() // Clean workspace after build
+        }
+    }
+}
