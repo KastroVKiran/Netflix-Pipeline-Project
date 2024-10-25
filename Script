@@ -80,7 +80,7 @@ pipeline {
                 }
             }
         }
-        stage('Deploy Stage') {
+        stage('Deployment Stage') {
             steps {
                 script {
                     // Ensure target directory exists before copying
