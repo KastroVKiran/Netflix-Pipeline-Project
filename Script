@@ -1,5 +1,5 @@
 Pipeline Script - Stage 1  
--------------------------
+------------------------
 pipeline {
     agent any
 
